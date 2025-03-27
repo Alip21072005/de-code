@@ -1,0 +1,50 @@
+{
+  "name": "decode_management_system",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@clerk/elements": "^0.14.6",
+    "@clerk/nextjs": "^5.7.5",
+    "@hookform/resolvers": "^3.9.0",
+    "@prisma/extension-accelerate": "^1.3.0",
+    "@types/react-big-calendar": "^1.8.9",
+    "decode_management_system": "file:",
+    "dotenv": "^16.4.7",
+    "lama-dev-next-dashboard": "file:",
+    "moment": "^2.30.1",
+    "next": "^14.2.26",
+    "next-cloudinary": "^6.13.0",
+    "postgres": "^3.4.5",
+    "react": "^18",
+    "react-big-calendar": "^1.13.2",
+    "react-calendar": "^5.0.0",
+    "react-dom": "^18",
+    "react-hook-form": "^7.52.2",
+    "react-toastify": "^10.0.5",
+    "recharts": "^2.12.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@prisma/client": "^6.5.0",
+    "@types/node": "^20.17.28",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8",
+    "prisma": "^6.5.0",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id       String @id
+  username String @unique
+}
+
+model Peserta {
+  id          String      @id
+  username    String      @unique
+  name        String
+  surname     String
+  email       String?     @unique
+  phone       String?     @unique
+  address     String
+  img         String?
+  bloodType   String
+  sex         UserSex
+  createdAt   DateTime    @default(now())
+  parentId    String
+  classId     Int
+  gradeId     Int
+  birthday    DateTime
+  attendances Kehadiran[]
+  results     Nilai[]
+  class       Kelas       @relation(fields: [classId], references: [id])
+  grade       Tingkat     @relation(fields: [gradeId], references: [id])
+  parent      OrangTua    @relation(fields: [parentId], references: [id])
+}
+
+model Mentor {
+  id        String          @id
+  username  String          @unique
+  name      String
+  surname   String
+  email     String?         @unique
+  phone     String?         @unique
+  address   String
+  img       String?
+  bloodType String
+  sex       UserSex
+  createdAt DateTime        @default(now())
+  birthday  DateTime
+  classes   Kelas[]
+  lessons   KelasTambahan[]
+  subjects  Materi[]        @relation("MateriToMentor")
+}
+
+model OrangTua {
+  id        String    @id
+  username  String    @unique
+  name      String
+  surname   String
+  email     String?   @unique
+  phone     String    @unique
+  address   String
+  createdAt DateTime  @default(now())
+  students  Peserta[]
+}
+
+model Tingkat {
+  id       Int       @id @default(autoincrement())
+  level    Int       @unique
+  classess Kelas[]
+  students Peserta[]
+}
+
+model Kelas {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  capacity      Int
+  supervisorId  String?
+  gradeId       Int
+  events        Event[]
+  grade         Tingkat         @relation(fields: [gradeId], references: [id])
+  supervisor    Mentor?         @relation(fields: [supervisorId], references: [id])
+  lessons       KelasTambahan[]
+  announcements Pengumuman[]
+  students      Peserta[]
+}
+
+model Materi {
+  id       Int             @id @default(autoincrement())
+  name     String          @unique
+  lessons  KelasTambahan[]
+  teachers Mentor[]        @relation("MateriToMentor")
+}
+
+model KelasTambahan {
+  id          Int         @id @default(autoincrement())
+  name        String
+  day         Day
+  startTime   DateTime
+  endTime     DateTime
+  subjectId   Int
+  classId     Int
+  teacherId   String
+  attendances Kehadiran[]
+  class       Kelas       @relation(fields: [classId], references: [id])
+  subject     Materi      @relation(fields: [subjectId], references: [id])
+  teacher     Mentor      @relation(fields: [teacherId], references: [id])
+  exams       Tes[]
+  assignments Tugas[]
+}
+
+model Tes {
+  id        Int           @id @default(autoincrement())
+  title     String
+  startTime DateTime
+  endTime   DateTime
+  lessonId  Int
+  results   Nilai[]
+  lesson    KelasTambahan @relation(fields: [lessonId], references: [id])
+}
+
+model Tugas {
+  id        Int           @id @default(autoincrement())
+  title     String
+  startDate DateTime
+  dueDate   DateTime
+  lessonId  Int
+  results   Nilai[]
+  lesson    KelasTambahan @relation(fields: [lessonId], references: [id])
+}
+
+model Nilai {
+  id           Int     @id @default(autoincrement())
+  score        Int
+  examId       Int?
+  assignmentId Int?
+  studentId    String
+  assignment   Tugas?  @relation(fields: [assignmentId], references: [id])
+  exam         Tes?    @relation(fields: [examId], references: [id])
+  student      Peserta @relation(fields: [studentId], references: [id])
+}
+
+model Kehadiran {
+  id        Int           @id @default(autoincrement())
+  date      DateTime
+  present   Boolean
+  studentId String
+  lessonId  Int
+  lesson    KelasTambahan @relation(fields: [lessonId], references: [id])
+  student   Peserta       @relation(fields: [studentId], references: [id])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  startTime   DateTime
+  endTime     DateTime
+  classId     Int?
+  class       Kelas?   @relation(fields: [classId], references: [id])
+}
+
+model Pengumuman {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime
+  classId     Int?
+  class       Kelas?   @relation(fields: [classId], references: [id])
+}
+
+enum UserSex {
+  MALE
+  FEMALE
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
