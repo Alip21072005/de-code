@@ -2,34 +2,37 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { routeAccessMap } from "./lib/settings";
 import { NextResponse } from "next/server";
 
-const matchers = Object.keys(routeAccessMap).map((route) => ({
-  matcher: createRouteMatcher([route]),
-  allowedRoles: routeAccessMap[route],
-}));
+const matchers = Object.keys(routeAccessMap)
+  .filter(route => routeAccessMap[route]) // Pastikan ada akses yang ditentukan
+  .map(route => ({
+    matcher: createRouteMatcher([route]),
+    allowedRoles: routeAccessMap[route],
+  }));
 
-console.log(matchers);
+console.log("Middleware Matchers:", matchers);
 
 export default clerkMiddleware((auth, req) => {
-  // if (isProtectedRoute(req)) auth().protect()
-
   const { sessionClaims } = auth();
+  const role = (sessionClaims?.metadata as { role?: string })?.role; // Hindari `role!`, gunakan optional chaining
 
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  if (!role) {
+    console.warn("User tanpa role mencoba mengakses halaman:", req.url);
+    return NextResponse.redirect(new URL("/login", req.url)); // Redirect ke login jika role tidak ditemukan
+  }
 
   for (const { matcher, allowedRoles } of matchers) {
-    if (matcher(req) && !allowedRoles.includes(role!)) {
+    if (matcher(req) && !allowedRoles.includes(role)) {
+      console.warn(`Akses ditolak untuk ${role} ke ${req.url}`);
       return NextResponse.redirect(new URL(`/${role}`, req.url));
     }
   }
+
+  return NextResponse.next();
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
+    "/(api|trpc)(.*)", // Middleware tetap berjalan di API routes
   ],
 };
-
-
