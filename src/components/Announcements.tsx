@@ -1,24 +1,32 @@
 import prisma from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { Pengumuman } from "@prisma/client";
 
-const Pengumuman = async () => {
-  const { userId, sessionClaims } = auth();
+
+interface RoleConditions {
+  teacher: object;
+  student: object;
+  parent: object;
+}
+
+const Announcements: React.FC = async () => {
+  const { userId, sessionClaims } = auth() as { userId: string; sessionClaims: any };
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-  const roleConditions = {
+  const roleConditions: RoleConditions = {
     teacher: { lessons: { some: { teacherId: userId! } } },
     student: { students: { some: { id: userId! } } },
     parent: { students: { some: { parentId: userId! } } },
   };
 
-  const data = await prisma.pengumuman.findMany({
+  const data: Pengumuman[] = await prisma.pengumuman.findMany({
     take: 3,
     orderBy: { date: "desc" },
     where: {
       ...(role !== "admin" && {
         OR: [
           { classId: null },
-          { class: roleConditions[role as keyof typeof roleConditions] || {} },
+          { class: roleConditions[role as keyof RoleConditions] || {} },
         ],
       }),
     },
@@ -69,4 +77,4 @@ const Pengumuman = async () => {
   );
 };
 
-export default Pengumuman;
+export default Announcements;
