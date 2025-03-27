@@ -30,4 +30,8 @@ export const config = {
     // Always run for API routes
     "/(api|trpc)(.*)",
   ],
+  runtime: "nodejs",
 };
+
+
+
